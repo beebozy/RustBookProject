@@ -1,10 +1,13 @@
 
 use std::{
-    io::{BufReader, prelude::*, Read, Write},
+    io::{BufReader, prelude::*, Write},
     net::{TcpListener, TcpStream},
     thread,
     time::Duration,
+
 };
+
+ use multithread_web_server::ThreadPool;
 use std::fs;
 fn main() {
     let listener= TcpListener::bind("127.0.0.1:7878").unwrap();
@@ -12,8 +15,16 @@ fn main() {
 
     for stream in listener.incoming(){
         let stream= stream.unwrap();
+        let pool = ThreadPool::new(4);
 
-        handle_connection(stream);
+        pool.execute(|| {
+            handle_connection(stream);
+        });
+
+        // thread::spawn(|| {
+        //     handle_connection(stream);
+        // });
+  //      handle_connection(stream);
        // println!("Connection established from {}", stream.peer_addr().unwrap());
     }
 }
